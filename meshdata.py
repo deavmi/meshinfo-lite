@@ -471,16 +471,16 @@ WHERE id = %s
         if not data:
             return
         payload = dict(data["decoded"]["json_payload"])
-        expected = [
-            "hw_model",
-            "long_name",
-            "short_name",
-            "role",
-            "firmware_version"
-        ]
-        for attr in expected:
+        defaults = {
+            "hw_model": None,
+            "long_name": f"Meshtastic {self.hex_id(data['from'])[-4:]}",
+            "short_name": self.hex_id(data['from'])[-4:],
+            "role": 0,
+            "firmware_version": None
+        }
+        for attr, default_value in defaults.items():
             if attr not in payload:
-                payload[attr] = None
+                payload[attr] = default_value
 
         sql = """INSERT INTO nodeinfo (
     id,
