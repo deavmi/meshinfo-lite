@@ -338,6 +338,42 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if node_uplinks %}
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr>
+            <th colspan="3" scope="col">MQTT Uplinked Nodes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for id, unode in node_uplinks.items() %}
+          <tr>
+            <td scope="col">
+              {% if id in nodes %}
+              <a href="node_{{ id }}.html">{{ nodes[id].short_name }}</a>
+              {% else %}
+              <span class="text-secondary">UNK</span>
+              {% endif %}
+            </td>
+            <td scope="col">
+              {% if id in nodes %}
+              <a href="node_{{ id }}.html">{{ nodes[id].long_name }}</a>
+              {% else %}
+              <span class="text-secondary">UNK</span>
+              {% endif %}
+            </td>
+            <td scope="col">
+              {% if unode.ts %}
+              {{ utils.time_since(unode.ts) }}
+              {% else %}
+              Unknown
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
     </div>
   </div>
   {% if los_profiles %}

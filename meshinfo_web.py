@@ -12,18 +12,14 @@ from waitress import serve
 from paste.translogger import TransLogger
 import configparser
 import logging
-import os
-
 import utils
 import meshtastic_support
 from meshdata import MeshData
 from meshinfo_register import Register
 from meshtastic_monday import MeshtasticMonday
 from meshinfo_telemetry_graph import draw_graph
-from meshinfo_los_profile import LOSProfile
 import json
 import datetime
-import time
 import re
 
 app = Flask(__name__)
@@ -367,10 +363,10 @@ def serve_static(filename):
         node_id = utils.convert_node_id_from_hex_to_int(node)
         node_telemetry = md.get_node_telemetry(node_id)
         node_route = md.get_route_coordinates(node_id)
+        node_uplinks = md.get_uplinked_nodes(node_id)
         telemetry_graph = draw_graph(node_telemetry)
-        #  lp = LOSProfile(nodes, node_id)
         return render_template(
-                f"node.html.j2",
+                "node.html.j2",
                 auth=auth(),
                 config=config,
                 node=nodes[node],
@@ -380,6 +376,7 @@ def serve_static(filename):
                 los_profiles={},
                 telemetry_graph=telemetry_graph,
                 node_route=node_route,
+                node_uplinks=node_uplinks,
                 utils=utils,
                 datetime=datetime.datetime,
                 timestamp=datetime.datetime.now(),

@@ -268,7 +268,8 @@ WHERE n.ts_seen > FROM_UNIXTIME(%s)"""
 
     def get_chat(self):
         chats = []
-        sql = "SELECT DISTINCT * FROM text WHERE to_id = 0xFFFFFFFF ORDER BY ts_created DESC"
+        sql = """SELECT DISTINCT *
+FROM text WHERE to_id = 0xFFFFFFFF ORDER BY ts_created DESC"""
         cur = self.db.cursor()
         cur.execute(sql)
         rows = cur.fetchall()
@@ -357,6 +358,23 @@ where id <> 4294967295 order by ts_created desc limit 1"""
                     record[col] = row[i]
         cur.close()
         return record
+
+    def get_uplinked_nodes(self, id):
+        uplinks = {}
+        sql = """select id, ts_seen from
+nodeinfo where updated_via=%s order by ts_seen desc"""
+        params = (id, )
+        cur = self.db.cursor()
+        cur.execute(sql, params)
+        rows = cur.fetchall()
+        for row in rows:
+            node_id = utils.convert_node_id_from_int_to_hex(row[0])
+            uplinks[node_id] = {
+                "id": row[0],
+                "ts": row[1].timestamp()
+            }
+        cur.close()
+        return uplinks
 
     def update_geocode(self, id, lat, lon):
         if self.config["geocoding"]["enabled"] != "true":
