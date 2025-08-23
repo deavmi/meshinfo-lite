@@ -361,6 +361,9 @@ where id <> 4294967295 order by ts_created desc limit 1"""
 
     def get_uplinked_nodes(self, id):
         uplinks = {}
+        active_threshold = int(
+            self.config["server"]["node_activity_prune_threshold"]
+        )
         sql = """select id, ts_seen from
 nodeinfo where updated_via=%s order by ts_seen desc"""
         params = (id, )
@@ -369,10 +372,13 @@ nodeinfo where updated_via=%s order by ts_seen desc"""
         rows = cur.fetchall()
         for row in rows:
             node_id = utils.convert_node_id_from_int_to_hex(row[0])
-            uplinks[node_id] = {
-                "id": row[0],
-                "ts": row[1].timestamp()
-            }
+            timeout = time.time() - active_threshold
+            ts = row[1].timestamp()
+            if ts > timeout:
+                uplinks[node_id] = {
+                    "id": row[0],
+                    "ts": ts
+                }
         cur.close()
         return uplinks
 
